@@ -5,10 +5,14 @@ require_once 'auth_helpers.php';
 auth_start_session();
 
 $error = "";
+$redirect = isset($_GET['redirect']) ? auth_sanitize_redirect($_GET['redirect'], 'store.php') : 'store.php';
+$notice = isset($_GET['notice']) ? $_GET['notice'] : '';
+$notice_message = auth_notice_message($notice);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = trim(strip_tags($_POST['email']));
     $password = trim($_POST['password']);
+    $redirect = isset($_POST['redirect']) ? auth_sanitize_redirect($_POST['redirect'], 'store.php') : 'store.php';
 
     if (!empty($email) && !empty($password)) {
         $safe_email = mysqli_real_escape_string($conn, $email);
@@ -33,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     mysqli_query($conn, "INSERT INTO audit_log (user_id, user_name, action) VALUES ($u_id, '$u_name', '$act')");
                     header("Location: admin_inventory.php");
                 } else {
-                    header("Location: store.php");
+                    header("Location: " . $redirect);
                 }
                 exit;
             } else {
@@ -58,7 +62,9 @@ include_once 'header.php';
     </div>
 
     <form action="login.php" method="POST" class="auth-card">
+        <?php if (!empty($notice_message)) echo "<p class='status-message'><strong>" . htmlspecialchars($notice_message) . "</strong></p>"; ?>
         <?php if (!empty($error)) echo "<p class='error-message'><strong>Error: " . htmlspecialchars($error) . "</strong></p>"; ?>
+        <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
 
         <label>
             <span>Email</span>
@@ -71,6 +77,7 @@ include_once 'header.php';
         </label>
 
         <button type="submit">Login</button>
+        <a class="button-link button-secondary" href="<?php echo htmlspecialchars(auth_notice_url('register.php', $notice === 'checkout_login' ? 'checkout_register' : '', $redirect)); ?>">Register Account</a>
     </form>
 </section>
 

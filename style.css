@@ -382,7 +382,7 @@ h3 {
 
 .hero-text {
     max-width: 610px;
-    color: rgba(255, 255, 255, 0.82);
+    color: #fff;
     font-size: clamp(1rem, 1.5vw, 1.22rem);
 }
 
@@ -423,6 +423,21 @@ h3 {
 .category-section {
     border-top: 1px solid var(--line-strong);
     padding-top: clamp(1.3rem, 3vw, 2.2rem);
+}
+
+.about-hero {
+    color: #fff;
+}
+
+.about-hero + .content-band {
+    color: var(--ink);
+}
+
+.about-hero + .content-band h1,
+.about-hero + .content-band h2,
+.about-hero + .content-band p,
+.about-hero + .content-band td {
+    color: var(--ink);
 }
 
 .section-heading {
@@ -751,6 +766,8 @@ h3 {
 .product-detail-title {
     margin-bottom: 0.75rem;
     font-size: clamp(2.1rem, 4.8vw, 4.9rem);
+    overflow-wrap: anywhere; /* Tells the browser to break long words anywhere to prevent overflow */
+    word-break: break-word;   /* Fallback for older browsers */
 }
 
 .detail-copy {

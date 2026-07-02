@@ -1,21 +1,11 @@
 <?php
 require_once 'db.php';
 require_once 'product_meta.php';
-include_once 'header.php';
+
+$status_message = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
-    $product_id = (int)$_POST['product_id'];
-
-    if (!isset($_SESSION['cart'])) {
-        $_SESSION['cart'] = array();
-    }
-
-    if (isset($_SESSION['cart'][$product_id])) {
-        $_SESSION['cart'][$product_id]++;
-    } else {
-        $_SESSION['cart'][$product_id] = 1;
-    }
-    echo "<p class='status-message floating-status'><strong>Item successfully added to your cart!</strong></p>";
+    $status_message = adidas_add_to_cart((int)$_POST['product_id']);
 }
 
 $categories = array();
@@ -43,7 +33,13 @@ if ($category_result) {
 if (empty($categories)) {
     $categories = array('Running', 'Originals', 'Basketball');
 }
+
+include_once 'header.php';
 ?>
+
+<?php if (!empty($status_message)): ?>
+    <p class="status-message floating-status"><strong><?php echo htmlspecialchars($status_message); ?></strong></p>
+<?php endif; ?>
 
 <section class="hero store-hero">
     <div class="hero-copy">

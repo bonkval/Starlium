@@ -1,8 +1,11 @@
 <?php
 require_once 'db.php';
+require_once 'auth_helpers.php';
 
-if (session_status() == PHP_SESSION_NONE) {
-    session_start();
+auth_start_session();
+
+if (!auth_refresh_session_user($conn)) {
+    auth_redirect_to_register('checkout_register', 'checkout.php');
 }
 
 if (!isset($_SESSION['cart']) || empty($_SESSION['cart'])) {

@@ -1,9 +1,14 @@
 <?php
 require_once 'db.php';
-include_once 'header.php';
+require_once 'auth_helpers.php';
+
+auth_start_session();
 
 $error = "";
 $success = "";
+$redirect = isset($_GET['redirect']) ? auth_sanitize_redirect($_GET['redirect'], '') : '';
+$notice = isset($_GET['notice']) ? $_GET['notice'] : '';
+$notice_message = auth_notice_message($notice);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $name = trim(strip_tags($_POST['name']));
@@ -12,6 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirm_password = $_POST['confirm_password'];
     $address = trim(strip_tags($_POST['address']));
     $phone = trim(strip_tags($_POST['phone']));
+    $redirect = isset($_POST['redirect']) ? auth_sanitize_redirect($_POST['redirect'], '') : '';
 
     if (empty($name) || empty($email) || empty($password) || empty($address) || empty($phone)) {
         $error = "All fields are required.";
@@ -36,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                       VALUES ('$safe_name', '$safe_email', '$safe_password', '$safe_address', '$safe_phone', 'buyer', 'active')";
 
             if (mysqli_query($conn, $query)) {
+                $new_user_id = mysqli_insert_id($conn);
                 $dir_path = "register_email";
 
                 if (!file_exists($dir_path)) {
@@ -59,6 +66,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     fclose($file_handle);
                 }
 
+                session_regenerate_id(true);
+                $_SESSION['user_id'] = (int)$new_user_id;
+                $_SESSION['user_name'] = $name;
+                $_SESSION['role'] = 'buyer';
+
+                if ($redirect !== '') {
+                    header("Location: " . $redirect);
+                    exit;
+                }
+
                 $success = "Registration successful! A simulated confirmation email has been logged to " . $log_file;
             } else {
                 $error = "Database Error: Could not complete registration.";
@@ -66,20 +83,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+include_once 'header.php';
 ?>
 
 <section class="auth-layout register-layout">
     <div class="auth-intro">
         <p class="eyebrow">New member</p>
-        <h1>Buyer Registration</h1>
+        <h1>Buyer Register</h1>
         <p>Create a buyer account and receive a simulated confirmation email record in the local project folder.</p>
     </div>
 
     <form action="register.php" method="POST" class="auth-card register-card">
         <?php
+        if (!empty($notice_message)) echo "<p class='status-message'><strong>" . htmlspecialchars($notice_message) . "</strong></p>";
         if (!empty($error)) echo "<p class='error-message'><strong>Error: " . htmlspecialchars($error) . "</strong></p>";
         if (!empty($success)) echo "<p class='success-message'><strong>Success: " . htmlspecialchars($success) . "</strong></p>";
         ?>
+        <input type="hidden" name="redirect" value="<?php echo htmlspecialchars($redirect); ?>">
 
         <label>
             <span>Complete Name</span>
@@ -112,6 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </label>
 
         <button type="submit">Register Account</button>
+        <a class="button-link button-secondary" href="<?php echo htmlspecialchars(auth_notice_url('login.php', $notice === 'checkout_register' ? 'checkout_login' : '', $redirect !== '' ? $redirect : 'store.php')); ?>">Login Instead</a>
     </form>
 </section>
 

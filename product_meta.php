@@ -1,4 +1,6 @@
 <?php
+require_once 'auth_helpers.php';
+
 function adidas_category_catalog() {
     return array(
         'Running' => array(
@@ -129,5 +131,95 @@ function adidas_stock_class($stock) {
 function adidas_product_url($product) {
     return 'product.php?id=' . (int)$product['id'];
 }
-?>
 
+function adidas_product_detail_meta($product) {
+    $category = isset($product['category']) ? $product['category'] : '';
+    $config = adidas_get_category_config($category);
+
+    $category_meta = array(
+        'Running' => array(
+            'colorway' => 'Performance running colorway',
+            'fit' => 'Secure running fit with cushioned step-in comfort',
+            'upper' => 'Breathable engineered mesh with supportive overlays'
+        ),
+        'Originals' => array(
+            'colorway' => 'Heritage lifestyle colorway',
+            'fit' => 'Classic low-profile fit for everyday wear',
+            'upper' => 'Durable textile and synthetic upper with archive-inspired panels'
+        ),
+        'Basketball' => array(
+            'colorway' => 'Court-ready signature colorway',
+            'fit' => 'Locked-in hoop fit for stops, cuts, and landings',
+            'upper' => 'Structured performance upper with reinforced support zones'
+        )
+    );
+
+    $details = isset($category_meta[$category]) ? $category_meta[$category] : array(
+        'colorway' => 'Adidas seasonal colorway',
+        'fit' => 'Comfort-focused fit for everyday movement',
+        'upper' => 'Supportive Adidas upper construction'
+    );
+
+    $details['best_for'] = $config['best_for'];
+
+    return $details;
+}
+
+function adidas_add_to_cart($product_id) {
+    global $conn;
+
+    auth_start_session();
+
+    if (!isset($conn)) {
+        return 'Unable to add this item right now.';
+    }
+
+    $user = auth_refresh_session_user($conn);
+
+    if (!$user) {
+        auth_redirect_to_login('cart_login', auth_current_local_url());
+    }
+
+    $product_id = (int)$product_id;
+
+    if ($product_id <= 0) {
+        return 'Unable to add that item to your cart.';
+    }
+
+    $stmt = mysqli_prepare($conn, "SELECT id, stock FROM products WHERE id = ? LIMIT 1");
+
+    if (!$stmt) {
+        return 'Unable to verify this item right now.';
+    }
+
+    mysqli_stmt_bind_param($stmt, "i", $product_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $product = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+
+    if (!$product) {
+        return 'Product not found.';
+    }
+
+    $stock = (int)$product['stock'];
+
+    if ($stock <= 0) {
+        return 'This product is currently out of stock.';
+    }
+
+    if (!isset($_SESSION['cart']) || !is_array($_SESSION['cart'])) {
+        $_SESSION['cart'] = array();
+    }
+
+    $current_quantity = isset($_SESSION['cart'][$product_id]) ? (int)$_SESSION['cart'][$product_id] : 0;
+
+    if ($current_quantity >= $stock) {
+        return 'Your cart already contains all available stock for this item.';
+    }
+
+    $_SESSION['cart'][$product_id] = $current_quantity + 1;
+
+    return 'Item successfully added to your cart!';
+}
+?>
