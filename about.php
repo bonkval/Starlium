@@ -27,20 +27,20 @@ include_once 'header.php';
         </thead>
         <tbody>
             <tr>
-                <td>Starlium Member Placeholder 1</td>
-                <td>Lead Software Architect / Database Integrator</td>
+                <td>Joseph Benedict Bondoc</td>
+                <td>Backend & Database Developer</td>
             </tr>
             <tr>
-                <td>Starlium Member Placeholder 2</td>
-                <td>Backend Session Logic Control Engineer</td>
+                <td>Phillip Calugay</td>
+                <td>Authentication & Backend Developer</td>
             </tr>
             <tr>
-                <td>Starlium Member Placeholder 3</td>
-                <td>Form Field Validation & Security Assurer</td>
+                <td>Jan Rainnier Odarbe</td>
+                <td>Security & Backend Developer</td>
             </tr>
             <tr>
-                <td>Starlium Member Placeholder 4</td>
-                <td>UX Layout Coordinator & Project Resource Structurer</td>
+                <td>Cedrick Rafael Vales</td>
+                <td>Frontend Developer & Project Lead</td>
             </tr>
         </tbody>
     </table>
