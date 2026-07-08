@@ -20,7 +20,7 @@ function nav_active($page, $current_page) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Starlium - Adidas Store</title>
     <link rel="icon" type="image/png" href="assets/starlium-logo.png">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=<?php echo filemtime('style.css'); ?>">
 </head>
 <body class="page-<?php echo htmlspecialchars($page_slug); ?>">
     <div class="site-shell">
@@ -51,7 +51,7 @@ function nav_active($page, $current_page) {
 
                 <?php if ($current_user): ?>
                     <?php if ($current_user['role'] === 'admin'): ?>
-                        <a href="admin_users.php"<?php echo nav_active('admin_users.php', $current_page); ?>>Admins</a>
+                        <a href="admin_users.php"<?php echo nav_active('admin_users.php', $current_page); ?>>Users</a>
                         <a href="admin_inventory.php"<?php echo nav_active('admin_inventory.php', $current_page); ?>>Inventory</a>
                         <a href="admin_reports.php"<?php echo nav_active('admin_reports.php', $current_page); ?>>Reports</a>
                     <?php endif; ?>
