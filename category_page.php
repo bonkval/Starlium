@@ -8,16 +8,31 @@ if (!isset($category_name)) {
 
 $category_config = adidas_get_category_config($category_name);
 $status_message = '';
+$search_query = isset($_GET['q']) ? trim(strip_tags($_GET['q'])) : "";
+$category_form_action = $category_config['page'] . ($search_query !== "" ? "?q=" . urlencode($search_query) : "");
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     $status_message = adidas_add_to_cart((int)$_POST['product_id']);
 }
 
 $products = array();
-$stmt = mysqli_prepare($conn, "SELECT * FROM products WHERE category = ? ORDER BY name ASC");
+$query = "SELECT * FROM products WHERE category = ?";
+
+if ($search_query !== "") {
+    $query .= " AND name LIKE ?";
+}
+
+$query .= " ORDER BY name ASC";
+$stmt = mysqli_prepare($conn, $query);
 
 if ($stmt) {
-    mysqli_stmt_bind_param($stmt, "s", $category_name);
+    if ($search_query !== "") {
+        $search_like = "%" . $search_query . "%";
+        mysqli_stmt_bind_param($stmt, "ss", $category_name, $search_like);
+    } else {
+        mysqli_stmt_bind_param($stmt, "s", $category_name);
+    }
+
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -43,7 +58,7 @@ include_once 'header.php';
         <a href="store.php#catalog" class="button-link">Back to Full Catalog</a>
     </div>
     <div class="hero-specs" aria-label="Category summary">
-        <span><?php echo count($products); ?> Models</span>
+        <span><?php echo count($products); ?> <?php echo $search_query !== "" ? "Matches" : "Models"; ?></span>
         <span><?php echo htmlspecialchars($category_config['best_for']); ?></span>
         <span>Display Sizes</span>
     </div>
@@ -62,14 +77,17 @@ include_once 'header.php';
     <div class="section-heading">
         <div>
             <p class="eyebrow">Available products</p>
-            <h2><?php echo htmlspecialchars($category_name); ?> Product Details</h2>
+            <h2><?php echo $search_query !== "" ? "Matching " : ""; ?><?php echo htmlspecialchars($category_name); ?> Product Details</h2>
         </div>
+        <?php if ($search_query !== ""): ?>
+            <a class="button-link button-secondary" href="<?php echo htmlspecialchars($category_config['page']); ?>">Clear Search</a>
+        <?php endif; ?>
     </div>
 
     <?php if (empty($products)): ?>
         <div class="empty-state">
-            <h2>No products available.</h2>
-            <p>This category does not have products in the database yet.</p>
+            <h2><?php echo $search_query !== "" ? "No matches found." : "No products available."; ?></h2>
+            <p><?php echo $search_query !== "" ? "No shoe names matched your search in this category." : "This category does not have products in the database yet."; ?></p>
         </div>
     <?php else: ?>
         <div class="product-grid">
@@ -109,7 +127,7 @@ include_once 'header.php';
                         <div class="product-card-actions">
                             <a class="button-link button-secondary" href="<?php echo htmlspecialchars($product_url); ?>">View Details</a>
                             <?php if ((int)$product['stock'] > 0): ?>
-                                <form action="<?php echo htmlspecialchars($category_config['page']); ?>" method="POST">
+                                <form action="<?php echo htmlspecialchars($category_form_action, ENT_QUOTES); ?>" method="POST">
                                     <input type="hidden" name="product_id" value="<?php echo (int)$product['id']; ?>">
                                     <button type="submit" name="add_to_cart">Add to Cart</button>
                                 </form>
