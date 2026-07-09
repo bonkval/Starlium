@@ -2,6 +2,19 @@
     const header = document.querySelector('[data-site-header]');
     const toggle = document.querySelector('[data-nav-toggle]');
     const nav = document.querySelector('[data-primary-nav]');
+    const phoneQuery = window.matchMedia('(max-width: 720px), (pointer: coarse) and (max-width: 900px)');
+
+    const updatePhoneClass = () => {
+        document.body.classList.toggle('is-phone', phoneQuery.matches);
+    };
+
+    updatePhoneClass();
+
+    if (typeof phoneQuery.addEventListener === 'function') {
+        phoneQuery.addEventListener('change', updatePhoneClass);
+    } else if (typeof phoneQuery.addListener === 'function') {
+        phoneQuery.addListener(updatePhoneClass);
+    }
 
     if (toggle && nav) {
         const setOpen = (isOpen) => {
