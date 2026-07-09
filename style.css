@@ -41,7 +41,7 @@ body {
 }
 
 body.nav-open {
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 a {
@@ -1207,6 +1207,10 @@ select:focus {
     z-index: 1;
 }
 
+.site-header {
+    z-index: 100;
+}
+
 .brand-lockup:hover .brand-mark {
     border-color: rgba(36, 92, 255, 0.34);
     box-shadow: 0 12px 32px rgba(36, 92, 255, 0.16);
@@ -1723,9 +1727,13 @@ body.is-phone .catalog-search-clear {
     }
 
     .primary-nav {
-        position: fixed;
-        inset: var(--header-height) 0 auto 0;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 110;
         max-height: calc(100vh - var(--header-height));
+        max-height: calc(100dvh - var(--header-height));
         overflow-y: auto;
         padding: 1rem;
         display: grid;
@@ -1734,14 +1742,16 @@ body.is-phone .catalog-search-clear {
         background: rgba(247, 243, 234, 0.98);
         border-bottom: 1px solid var(--line-strong);
         box-shadow: 0 24px 55px rgba(16, 16, 16, 0.18);
-        transform: translateY(-120%);
+        visibility: hidden;
+        transform: translateY(-10px);
         opacity: 0;
         pointer-events: none;
-        transition: transform 260ms var(--ease), opacity 260ms var(--ease);
+        transition: transform 180ms var(--ease), opacity 180ms var(--ease), visibility 180ms var(--ease);
     }
 
     .primary-nav.is-open {
         transform: translateY(0);
+        visibility: visible;
         opacity: 1;
         pointer-events: auto;
     }
@@ -1822,17 +1832,18 @@ body.is-phone .catalog-search-clear {
     }
 
     .site-header {
-        padding: 0.8rem 1rem;
+        padding: 0.55rem 0.75rem;
     }
 
     .site-header.has-catalog-search {
-        --header-height: 132px;
+        --header-height: 108px;
         grid-template-columns: auto auto;
-        gap: 0.7rem;
+        gap: 0.45rem 0.65rem;
     }
 
     .brand-lockup {
-        grid-template-columns: 44px auto;
+        grid-template-columns: 40px auto;
+        gap: 0.65rem;
     }
 
     .site-header.has-catalog-search .brand-lockup {
@@ -1841,8 +1852,8 @@ body.is-phone .catalog-search-clear {
     }
 
     .brand-mark {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
     }
 
     .brand-copy strong {
@@ -1853,6 +1864,12 @@ body.is-phone .catalog-search-clear {
         font-size: 0.72rem;
     }
 
+    .nav-toggle {
+        width: 42px;
+        height: 42px;
+        min-height: 42px;
+    }
+
     .site-header.has-catalog-search .nav-toggle {
         grid-column: 2;
         grid-row: 1;
@@ -1861,15 +1878,26 @@ body.is-phone .catalog-search-clear {
     .catalog-header-search {
         grid-column: 1 / -1;
         grid-row: 2;
-        grid-template-columns: minmax(0, 1fr) auto auto;
+        grid-template-columns: minmax(0, 1fr) minmax(58px, auto) 38px;
+        gap: 0.35rem;
     }
 
     .catalog-header-search input {
-        min-height: 44px;
+        min-height: 38px;
+        padding: 0.52rem 0.62rem;
+        font-size: 0.9rem;
     }
 
     .catalog-header-search button {
-        min-width: 82px;
+        min-width: 58px;
+        min-height: 38px;
+        padding: 0.52rem 0.58rem;
+        font-size: 0.82rem;
+    }
+
+    .catalog-search-clear {
+        width: 38px;
+        min-height: 38px;
     }
 
     .primary-nav {
@@ -2087,10 +2115,43 @@ body.is-phone .catalog-search-clear {
         padding-inline: 0.75rem;
     }
 
+    .nav-toggle {
+        width: 40px;
+        min-width: 40px;
+        height: 40px;
+        min-height: 40px;
+        padding: 0;
+    }
+
+    .site-header.has-catalog-search {
+        --header-height: 102px;
+    }
+
+    .site-header.has-catalog-search .brand-lockup {
+        min-width: 0;
+    }
+
+    .catalog-header-search {
+        grid-template-columns: minmax(0, 1fr) 52px 36px;
+    }
+
     .catalog-header-search button,
     .catalog-search-clear {
         width: auto;
-        padding-inline: 0.65rem;
+        min-height: 36px;
+        padding-inline: 0.45rem;
+        font-size: 0.78rem;
+    }
+
+    .catalog-search-clear {
+        width: 36px;
+        min-width: 36px;
+        padding: 0;
+    }
+
+    .catalog-header-search input {
+        min-height: 36px;
+        font-size: 0.84rem;
     }
 
     .size-chip {
