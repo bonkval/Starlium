@@ -8,6 +8,10 @@ $current_user = auth_refresh_session_user($conn);
 $page_parts = explode('/', $_SERVER['PHP_SELF']);
 $current_page = end($page_parts);
 $page_slug = str_replace('.php', '', $current_page);
+$catalog_search_pages = array('store.php', 'running.php', 'originals.php', 'basketball.php');
+$show_catalog_search = in_array($current_page, $catalog_search_pages, true);
+$catalog_search_query = isset($_GET['q']) ? trim(strip_tags($_GET['q'])) : "";
+$catalog_search_action = $current_page === 'store.php' ? 'store.php#catalog' : $current_page;
 
 function nav_active($page, $current_page) {
     return $page === $current_page ? ' aria-current="page"' : '';
@@ -24,7 +28,7 @@ function nav_active($page, $current_page) {
 </head>
 <body class="page-<?php echo htmlspecialchars($page_slug); ?>">
     <div class="site-shell">
-        <header class="site-header" data-site-header>
+        <header class="site-header<?php echo $show_catalog_search ? ' has-catalog-search' : ''; ?>" data-site-header>
             <a class="brand-lockup" href="store.php" aria-label="Starlium home">
                 <span class="brand-mark" aria-hidden="true">
                     <img src="assets/starlium-logo.png" alt="">
@@ -40,6 +44,19 @@ function nav_active($page, $current_page) {
                 <span></span>
                 <span></span>
             </button>
+
+            <?php if ($show_catalog_search): ?>
+                <form class="catalog-header-search" action="<?php echo htmlspecialchars($catalog_search_action, ENT_QUOTES); ?>" method="GET" role="search">
+                    <label>
+                        <span class="screen-reader-text">Search shoe records</span>
+                        <input type="search" name="q" value="<?php echo htmlspecialchars($catalog_search_query, ENT_QUOTES); ?>" placeholder="Search shoe name">
+                    </label>
+                    <button type="submit">Search</button>
+                    <?php if ($catalog_search_query !== ""): ?>
+                        <a class="catalog-search-clear" href="<?php echo htmlspecialchars($catalog_search_action, ENT_QUOTES); ?>" aria-label="Clear shoe search" title="Clear search">X</a>
+                    <?php endif; ?>
+                </form>
+            <?php endif; ?>
 
             <nav class="primary-nav" id="primary-nav" data-primary-nav>
                 <a href="store.php"<?php echo nav_active('store.php', $current_page); ?>>Store</a>
