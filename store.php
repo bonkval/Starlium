@@ -3,6 +3,8 @@ require_once 'db.php';
 require_once 'product_meta.php';
 
 $status_message = '';
+$search_query = isset($_GET['q']) ? trim(strip_tags($_GET['q'])) : "";
+$catalog_form_action = "store.php" . ($search_query !== "" ? "?q=" . urlencode($search_query) : "") . "#catalog";
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_to_cart'])) {
     $status_message = adidas_add_to_cart((int)$_POST['product_id']);
@@ -70,7 +72,7 @@ include_once 'header.php';
             <div class="section-heading">
                 <div>
                     <p class="eyebrow"><?php echo htmlspecialchars($cat); ?></p>
-                    <h2><?php echo htmlspecialchars($cat); ?> Collection</h2>
+                    <h2><?php echo $search_query !== "" ? "Matching " : ""; ?><?php echo htmlspecialchars($cat); ?> Collection</h2>
                 </div>
                 <a class="button-link button-secondary" href="<?php echo htmlspecialchars(adidas_category_url($cat)); ?>">View <?php echo htmlspecialchars($cat); ?></a>
             </div>
@@ -87,7 +89,14 @@ include_once 'header.php';
                 <tbody>
                     <?php
                     $safe_cat = mysqli_real_escape_string($conn, $cat);
-                    $query = "SELECT * FROM products WHERE category = '$safe_cat' ORDER BY id ASC";
+                    $query = "SELECT * FROM products WHERE category = '$safe_cat'";
+
+                    if ($search_query !== "") {
+                        $safe_search = mysqli_real_escape_string($conn, $search_query);
+                        $query .= " AND name LIKE '%$safe_search%'";
+                    }
+
+                    $query .= " ORDER BY id ASC";
                     $result = mysqli_query($conn, $query);
 
                     if (mysqli_num_rows($result) > 0) {
@@ -102,7 +111,7 @@ include_once 'header.php';
                                 echo "<td>";
                                 echo "<div class='table-actions'>";
                                 echo "<a class='button-link button-secondary' href='" . htmlspecialchars($product_url) . "'>Details</a>";
-                                echo "<form action='store.php' method='POST' class='inline-form'>";
+                                echo "<form action='" . htmlspecialchars($catalog_form_action, ENT_QUOTES) . "' method='POST' class='inline-form'>";
                                 echo "<input type='hidden' name='product_id' value='" . (int)$row['id'] . "'>";
                                 echo "<button type='submit' name='add_to_cart'>Add to Cart</button>";
                                 echo "</form>";
@@ -115,7 +124,8 @@ include_once 'header.php';
                             echo "</tr>";
                         }
                     } else {
-                        echo "<tr><td colspan='4'>No products available in this category.</td></tr>";
+                        $empty_message = $search_query !== "" ? "No products matched your search in this category." : "No products available in this category.";
+                        echo "<tr><td colspan='4'>" . htmlspecialchars($empty_message) . "</td></tr>";
                     }
                     ?>
                 </tbody>
